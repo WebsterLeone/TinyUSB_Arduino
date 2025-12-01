@@ -67,6 +67,9 @@ extern "C" {
 #define CFG_TUD_ENDPOINT0_SIZE 64
 
 //------------- CLASS -------------//
+#ifndef CFG_TUD_AUDIO
+#define CFG_TUD_AUDIO 1
+#endif
 #ifndef CFG_TUD_CDC
 #define CFG_TUD_CDC 1
 #endif
@@ -88,6 +91,29 @@ extern "C" {
 #ifndef CFG_TUD_VIDEO_STREAMING
 #define CFG_TUD_VIDEO_STREAMING 1 // number of video streaming interfaces
 #endif
+
+// Audio
+#define CFG_TUD_AUDIO_FUNC_1_N_AS_INT              1
+#define CFG_TUD_AUDIO_FUNC_1_SAMPLE_RATE           48000
+#define CFG_TUD_AUDIO_FUNC_1_DESC_LEN              TUD_AUDIO_MIC_ONE_CH_DESC_LEN
+#define CFG_TUD_AUDIO_FUNC_1_CTRL_BUF_SZ           64
+#define CFG_TUD_AUDIO_ENABLE_EP_IN                 1
+#define CFG_TUD_AUDIO_ENABLE_EP_OUT                1
+// This value is not required by the driver, it parses this information from the descriptor once the alternate interface is set by the host - we use it for the setup
+#define CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX 2
+// This value is not required by the driver, it parses this information from the descriptor once the alternate interface is set by the host - we use it for the setup
+#define CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX         1
+#define CFG_TUD_AUDIO_EP_SZ_IN TUD_AUDIO_EP_SIZE(  \
+  CFG_TUD_AUDIO_FUNC_1_SAMPLE_RATE,                \
+  CFG_TUD_AUDIO_FUNC_1_N_BYTES_PER_SAMPLE_TX,      \
+  CFG_TUD_AUDIO_FUNC_1_N_CHANNELS_TX               \
+)
+
+#define CFG_TUD_AUDIO_EP_IN_FLOW_CONTROL              1
+
+#define CFG_TUD_AUDIO_FUNC_1_EP_IN_SZ_MAX      CFG_TUD_AUDIO_EP_SZ_IN
+#define CFG_TUD_AUDIO_FUNC_1_EP_IN_SW_BUF_SZ   (TUD_OPT_HIGH_SPEED ? 32 : 4) * CFG_TUD_AUDIO_EP_SZ_IN // Example write FIFO every 1ms, so it should be 8 times larger for HS device
+#define CFG_TUD_AUDIO_FUNC_1_EP_OUT_SZ_MAX      CFG_TUD_AUDIO_EP_SZ_OUT
 
 // video streaming endpoint buffer size
 #define CFG_TUD_VIDEO_STREAMING_EP_BUFSIZE 256

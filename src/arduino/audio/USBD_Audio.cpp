@@ -361,8 +361,9 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
   {
 	// D7: b0 = out/b1 = in; D6..4: rsvd; D3..0: endpoint number
 	uint8_t endpoint = ep_in;
+	uint16_t epSize = maxPacketSize;
 	uint8_t interval = pollingInterval; // polling interval for data transfers
-    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_ISO_FB_EP( endpoint, interval )};
+    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_ISO_FB_EP( endpoint, epSize, interval )};
     memcpy(buf + len, desc, sizeof(desc));
     len += sizeof(desc);	
   }
