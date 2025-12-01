@@ -6,16 +6,15 @@
 
 class USBD_Audio : public Adafruit_USBD_Interface {
   // Descriptor strings
-  static constexpr const char *AUDIO_COLLECTION_NAME = "AURA MGP01";
-  static constexpr const char *FEATURE_UNIT_NAME = "AURA Controls";
+  static constexpr const char *AUDIO_COLLECTION_NAME = "SAMD Audio Device";
+  static constexpr const char *FEATURE_UNIT_NAME = "Controls";
   static constexpr const char *INPUT_TERMINAL_ANALOG_NAME = "Analog in";
   static constexpr const char *OUTPUT_TERMINAL_ANALOG_NAME = "Analog out";
   // Number of samples per channel to buffer
   static const size_t DEFAULT_BUFFER_SAMPLES = 32;
   
   // Descriptor string IDs
-  uint8_t *sourceStrIDs; // Main name for setStringDescriptor
-  uint8_t audioCollectionStrIndex = 0;
+  //uint8_t *sourceStrIDs; // Main name for setStringDescriptor
   uint8_t featureUnitStrIndex = 0;
   uint8_t inputTerminalStrIndex = 0;
   uint8_t outputTerminalStrIndex = 0;

@@ -21,7 +21,7 @@ USBD_Audio::USBD_Audio( uint8_t numberOfChannels, uint8_t bitDepth, uint16_t buf
 	txBuffer = (uint16_t*)malloc( bufferSize );
 	rxBuffer = (uint16_t*)malloc( bufferSize );
   }
-  audioCollectionStrIndex = TinyUSBDevice.addStringDescriptor(AUDIO_COLLECTION_NAME);
+  //audioCollectionStrIndex = TinyUSBDevice.addStringDescriptor(AUDIO_COLLECTION_NAME);
   featureUnitStrIndex = TinyUSBDevice.addStringDescriptor(FEATURE_UNIT_NAME);
   outputTerminalStrIndex = TinyUSBDevice.addStringDescriptor(OUTPUT_TERMINAL_ANALOG_NAME);
   inputTerminalStrIndex = TinyUSBDevice.addStringDescriptor(INPUT_TERMINAL_ANALOG_NAME);
@@ -131,7 +131,7 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
 
   // Header of the Audio Interface Collection
   {
-    uint8_t desc[] = {TUD_AUDIO_DESC_IAD(itfNum, itfCount, audioCollectionStrIndex )};
+    uint8_t desc[] = {TUD_AUDIO_DESC_IAD(itfNum, itfCount, _strid )};
     memcpy(buf + len, desc, sizeof(desc));
     len += sizeof(desc);
   }
