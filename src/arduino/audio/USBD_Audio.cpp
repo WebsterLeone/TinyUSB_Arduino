@@ -1,6 +1,6 @@
 #include "USBD_Audio.h"
 #include <tusb.h> // 
-#include <class/audio/audio_device.h> // tud_audio_write
+#include <class/audio/audio_device.h> // tud_audio_write, tud_audio_read
 #include <class/audio/audio.h> // constants (AUDIO_FUNC_MUSICAL_INSTRUMENT)
 #include <arduino/Adafruit_USBD_Device.h> // TinyUSBDevice.;
 #include <cstdlib> // malloc/free
@@ -18,8 +18,8 @@ USBD_Audio::USBD_Audio( uint8_t numberOfChannels, uint8_t bitDepth, uint16_t buf
     bufferSize( channels * bitDepth * bufferSampleDepth ) {
   // Only allocate buffers if external buffers aren't being used
   if( bufferSampleDepth != 0 ) {
-	rxBuffer = (uint16_t*)malloc( bufferSize );
 	txBuffer = (uint16_t*)malloc( bufferSize );
+	rxBuffer = (uint16_t*)malloc( bufferSize );
   }
   audioCollectionStrIndex = TinyUSBDevice.addStringDescriptor(AUDIO_COLLECTION_NAME);
   featureUnitStrIndex = TinyUSBDevice.addStringDescriptor(FEATURE_UNIT_NAME);
@@ -28,8 +28,8 @@ USBD_Audio::USBD_Audio( uint8_t numberOfChannels, uint8_t bitDepth, uint16_t buf
 }
 
 USBD_Audio::~USBD_Audio() {
-  free( rxBuffer );
-  free( txBuffer );
+  if( txBuffer != nullptr ) { free( txBuffer ); }
+  if( rxBuffer != nullptr ) { free( rxBuffer ); }
 }
 
 bool USBD_Audio::begin() {
@@ -75,12 +75,15 @@ bool USBD_Audio::update( uint8_t *txBuf, size_t *txCount, uint8_t *rxBuf, size_t
   return ok;
 }
 
-bool USBD_Audio::update( uint16_t *txBuf, size_t txCount, uint16_t *rxBuf, size_t rxCount ) {
-  return update( (uint8_t*)txBuf, txCount*2, (uint8_t*)rxBuf, rxCount*2 );
+bool USBD_Audio::update( uint16_t *txBuf, size_t *txCount, uint16_t *rxBuf, size_t rxCount ) {
+  *txCount *= 2;
+  bool ok = update( (uint8_t*)txBuf, txCount, (uint8_t*)rxBuf, rxCount*2 );
+  *txCount /= 2;
+  return ok;
 }
 
 bool USBD_Audio::update() {
-  return update( txBuffer, txBufCount, rxBuffer, rxBufCount );
+  return update( txBuffer, &txBufCount, rxBuffer, rxBufCount );
 }
 
 uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,

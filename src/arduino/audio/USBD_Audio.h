@@ -17,6 +17,8 @@ class USBD_Audio : public Adafruit_USBD_Interface {
   uint8_t *sourceStrIDs; // Main name for setStringDescriptor
   uint8_t audioCollectionStrIndex = 0;
   uint8_t featureUnitStrIndex = 0;
+  uint8_t inputTerminalStrIndex = 0;
+  uint8_t outputTerminalStrIndex = 0;
   // Digital audio attributes
   const uint8_t channels;
   const uint8_t bitDepth;
@@ -48,7 +50,7 @@ class USBD_Audio : public Adafruit_USBD_Interface {
   // Use when supplying your own buffers for 8-bit samples.
   bool update( uint8_t *txBuf, size_t *txCount, uint8_t *rxBuf, size_t rxCount );
   // Use when supplying your own buffers for 9 to 16-bit samples.
-  bool update( uint16_t *txBuf, size_t txCount, uint16_t *rxBuf, size_t rxCount ); 
+  bool update( uint16_t *txBuf, size_t *txCount, uint16_t *rxBuf, size_t rxCount ); 
   
   //setChannels( uint8_t channels );
   //uint8_t getChannels();
