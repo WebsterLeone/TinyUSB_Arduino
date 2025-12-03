@@ -105,17 +105,17 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
     TUD_AUDIO_DESC_INPUT_TERM_LEN + // USB out
     TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL_LEN + // Controls (Mute/Volume/Bass/Delay/etc)
     TUD_AUDIO_DESC_OUTPUT_TERM_LEN + // Line-out
-	TUD_AUDIO_DESC_INPUT_TERM_LEN + // Analog in
-    TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL_LEN + // Controls (Mute/Volume/Bass/Delay/etc)
-	TUD_AUDIO_DESC_OUTPUT_TERM_LEN + //USB in
+	// TUD_AUDIO_DESC_INPUT_TERM_LEN + // Analog in
+    // TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL_LEN + // Controls (Mute/Volume/Bass/Delay/etc)
+	// TUD_AUDIO_DESC_OUTPUT_TERM_LEN + //USB in
 // End of block
     TUD_AUDIO_DESC_STD_AS_INT_LEN + // Std. AudioStream Itf. Descriptor (Alt 0, no EPs)
     TUD_AUDIO_DESC_STD_AS_INT_LEN + // Std. AudioStream Itf. Descriptor (Alt 1, streaming)
     TUD_AUDIO_DESC_CS_AS_INT_LEN + // Class-specific AudioStream Itf. Descriptor
     TUD_AUDIO_DESC_TYPE_I_FORMAT_LEN + // Type 1? Format Descriptor
     TUD_AUDIO_DESC_STD_AS_ISO_EP_LEN + // Std AudStrm Isochronous Audio Data EP Descriptor (4.10.1.1)
-    TUD_AUDIO_DESC_CS_AS_ISO_EP_LEN + // Class-specific AS Isochronous Audio Data EP Descriptor (4.10.1.2)
-    TUD_AUDIO_DESC_STD_AS_ISO_FB_EP_LEN; //Std AudStrm Isochronous Feedback EP Descriptor(4.10.2.1)
+    TUD_AUDIO_DESC_CS_AS_ISO_EP_LEN;// + // Class-specific AS Isochronous Audio Data EP Descriptor (4.10.1.2)
+    // TUD_AUDIO_DESC_STD_AS_ISO_FB_EP_LEN; //Std AudStrm Isochronous Feedback EP Descriptor(4.10.2.1)
   
   // null buffer is used to get the length of descriptor only
   if (!buf) {
@@ -150,7 +150,7 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
     uint16_t bcdADC = 2; // Audio Device Class Specification Release in BCD
     uint8_t category = AUDIO_FUNC_MUSICAL_INSTRUMENT; // 0x09 == Musical Instrument
 	// totalLen is length of all clock source, feature unit, and terminal descriptors combined
-    uint16_t totalLen = TUD_AUDIO_DESC_CLK_SRC_LEN + TUD_AUDIO_DESC_INPUT_TERM_LEN * 2 + TUD_AUDIO_DESC_OUTPUT_TERM_LEN *2 + TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL_LEN;
+    uint16_t totalLen = TUD_AUDIO_DESC_CLK_SRC_LEN + TUD_AUDIO_DESC_INPUT_TERM_LEN * 2 + TUD_AUDIO_DESC_OUTPUT_TERM_LEN *2 + TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL_LEN * 2;
     uint8_t ctrl = 0x00; // D7..2 = RSVD, set to 0; 1..0 Latency Control Available (no = b00)
     uint8_t desc[] = {TUD_AUDIO_DESC_CS_AC( bcdADC, category, totalLen, ctrl )};
     memcpy(buf + len, desc, sizeof(desc));
@@ -233,58 +233,58 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
     len += sizeof(desc);
   }
   
-  // Input Terminal: analog input from ADC or I2S interface
-  {
-    uint8_t termID = id++;
-    uint16_t termType = 0x601; // Generic analog connector
-    uint8_t assocTerm = termID + 2; // Output it's associated with
-    uint8_t clkID = groupClockID; // Clock used by this terminal
-    uint8_t channels = 1;
-    uint32_t channelSpatialCfg = 0x00; // No spatial data
-    uint8_t ch1nameID = 0; // Add in constructor.
-    // Controls Not Available (b00), Available (b01), or Writable (b11)
-    // D15..14 Rsvd, D13..12 Phantom Power, D11..10 Overflow, D9..8 Underflow, D7..6 Cluster
-    // D5..4 Overload, D3..2 Connector, D1..0 Copy Protection
-    uint16_t controls = 0x0000;
-    uint8_t strIdx = inputTerminalStrIndex;
-    uint8_t desc[] = {TUD_AUDIO_DESC_INPUT_TERM( termID, termType, assocTerm, clkID, channels, channelSpatialCfg, ch1nameID, controls, strIdx )};
-    memcpy(buf + len, desc, sizeof(desc));
-    len += sizeof(desc);
-  }
+  // // Input Terminal: analog input from ADC or I2S interface
+  // {
+    // uint8_t termID = id++;
+    // uint16_t termType = 0x601; // Generic analog connector
+    // uint8_t assocTerm = termID + 2; // Output it's associated with
+    // uint8_t clkID = groupClockID; // Clock used by this terminal
+    // uint8_t channels = 1;
+    // uint32_t channelSpatialCfg = 0x00; // No spatial data
+    // uint8_t ch1nameID = 0; // Add in constructor.
+    // // Controls Not Available (b00), Available (b01), or Writable (b11)
+    // // D15..14 Rsvd, D13..12 Phantom Power, D11..10 Overflow, D9..8 Underflow, D7..6 Cluster
+    // // D5..4 Overload, D3..2 Connector, D1..0 Copy Protection
+    // uint16_t controls = 0x0000;
+    // uint8_t strIdx = inputTerminalStrIndex;
+    // uint8_t desc[] = {TUD_AUDIO_DESC_INPUT_TERM( termID, termType, assocTerm, clkID, channels, channelSpatialCfg, ch1nameID, controls, strIdx )};
+    // memcpy(buf + len, desc, sizeof(desc));
+    // len += sizeof(desc);
+  // }
 
-  // Feature Unit (Functions)
-  {
-    uint8_t unitID = id++;
-	uint8_t srcID = id-1; // Input it's associated with
-    // Controls Not Available (b00), Available (b01), or Writable (b11)
-    // D31..30 HPF, D29..28 Overflow, D27..26 Underflow, D25..24 Phase Inverter
-    // D23..22 Input Gain Atten, D21..20 Input Gain, D19..18 Loudness,
-    // D17..16 Bass boost, D15..14 Delay, D13..12 AGC, D11..10 Graphical EQ,
-    // D9..8 Treble, D7..6 Mid, D5..4 Bass, D3..2 Volume, D1..0 Mute
-    uint32_t masterControls = 0x00000003; // master control is "channel 0"
-	uint32_t ch1Controls = 0x00000000; // No individual logical channel control
-    uint8_t strIdx = featureUnitStrIndex;
-    uint8_t desc[] = {TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL( unitID, srcID, masterControls, ch1Controls, strIdx )};
-    memcpy(buf + len, desc, sizeof(desc));
-    len += sizeof(desc);
-  }
+  // // Feature Unit (Functions)
+  // {
+    // uint8_t unitID = id++;
+	// uint8_t srcID = id-1; // Input it's associated with
+    // // Controls Not Available (b00), Available (b01), or Writable (b11)
+    // // D31..30 HPF, D29..28 Overflow, D27..26 Underflow, D25..24 Phase Inverter
+    // // D23..22 Input Gain Atten, D21..20 Input Gain, D19..18 Loudness,
+    // // D17..16 Bass boost, D15..14 Delay, D13..12 AGC, D11..10 Graphical EQ,
+    // // D9..8 Treble, D7..6 Mid, D5..4 Bass, D3..2 Volume, D1..0 Mute
+    // uint32_t masterControls = 0x00000003; // master control is "channel 0"
+	// uint32_t ch1Controls = 0x00000000; // No individual logical channel control
+    // uint8_t strIdx = featureUnitStrIndex;
+    // uint8_t desc[] = {TUD_AUDIO_DESC_FEATURE_UNIT_ONE_CHANNEL( unitID, srcID, masterControls, ch1Controls, strIdx )};
+    // memcpy(buf + len, desc, sizeof(desc));
+    // len += sizeof(desc);
+  // }
 
-  // Output Terminal: out from device into USB host
-  {
-    uint8_t termID = id++;
-    uint16_t termType = 0x101;      // USB streaming
-    uint8_t assocTerm = termID - 2; // Input it's associated with
-	uint8_t srcID = termID - 1;     // Feature Unit this output is associated with
-    uint8_t clkID = groupClockID;   // Clock used by this terminal
-    // Controls Not Available (b00), Available (b01), or Writable (b11)
-    // D15..10 Rsvd, D9..8 Overflow, D7..6 Underflow,
-    // D5..4 Overload, D3..2 Connector, D1..0 Copy Protection
-    uint16_t controls = 0x0000;
-    uint8_t strIdx = 0; // None
-    uint8_t desc[] = {TUD_AUDIO_DESC_OUTPUT_TERM( termID, termType, assocTerm, srcID, clkID, controls, strIdx )};
-    memcpy(buf + len, desc, sizeof(desc));
-    len += sizeof(desc);
-  }
+  // // Output Terminal: out from device into USB host
+  // {
+    // uint8_t termID = id++;
+    // uint16_t termType = 0x101;      // USB streaming
+    // uint8_t assocTerm = termID - 2; // Input it's associated with
+	// uint8_t srcID = termID - 1;     // Feature Unit this output is associated with
+    // uint8_t clkID = groupClockID;   // Clock used by this terminal
+    // // Controls Not Available (b00), Available (b01), or Writable (b11)
+    // // D15..10 Rsvd, D9..8 Overflow, D7..6 Underflow,
+    // // D5..4 Overload, D3..2 Connector, D1..0 Copy Protection
+    // uint16_t controls = 0x0000;
+    // uint8_t strIdx = 0; // None
+    // uint8_t desc[] = {TUD_AUDIO_DESC_OUTPUT_TERM( termID, termType, assocTerm, srcID, clkID, controls, strIdx )};
+    // memcpy(buf + len, desc, sizeof(desc));
+    // len += sizeof(desc);
+  // }
   
   // Std. AudioStreaming Itf. Descriptor (Alt 0, no EPs) (4.9.1)
   {
@@ -292,7 +292,7 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
 	// No data EP (0x00), Data EP (0x01), or Data + Explicit Feedback EP (0x02)
     uint8_t numEPs = 0;     // Using general data endpoints? (not sure how this fallback works)
     uint8_t strIdx = 0;    // None
-    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_INT( itfNum, altSet, numEPs, strIdx )};
+    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_INT( itfNum+1, altSet, numEPs, strIdx )};
     memcpy(buf + len, desc, sizeof(desc));
     len += sizeof(desc);	
   }
@@ -302,7 +302,7 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
 	// No data EP (0x00), Data EP (0x01), or Data + Explicit Feedback EP (0x02)
     uint8_t numEPs = itfCount; // Using endpoints for full-duplex isochronous streaming
     uint8_t strIdx = 0;       // None
-    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_INT( itfNum, altSet, numEPs, strIdx )};
+    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_INT( itfNum+1, altSet, numEPs, strIdx )};
     memcpy(buf + len, desc, sizeof(desc));
     len += sizeof(desc);	
   }
@@ -358,15 +358,15 @@ uint16_t USBD_Audio::getInterfaceDescriptor(uint8_t itfnum_deprecated,
     len += sizeof(desc);	
   }
   //Std AudStrm Isochronous Feedback EP Descriptor(4.10.2.1)
-  {
-	// D7: b0 = out/b1 = in; D6..4: rsvd; D3..0: endpoint number
-	uint8_t endpoint = ep_in;
-	uint16_t epSize = maxPacketSize;
-	uint8_t interval = pollingInterval; // polling interval for data transfers
-    uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_ISO_FB_EP( endpoint, epSize, interval )};
-    memcpy(buf + len, desc, sizeof(desc));
-    len += sizeof(desc);	
-  }
+  // {
+	// // D7: b0 = out/b1 = in; D6..4: rsvd; D3..0: endpoint number
+	// uint8_t endpoint = ep_in;
+	// uint16_t epSize = maxPacketSize;
+	// uint8_t interval = pollingInterval; // polling interval for data transfers
+    // uint8_t desc[] = {TUD_AUDIO_DESC_STD_AS_ISO_FB_EP( endpoint, epSize, interval )};
+    // memcpy(buf + len, desc, sizeof(desc));
+    // len += sizeof(desc);	
+  // }
   
   if (len != desc_len) {
     // TODO should throw an error message
